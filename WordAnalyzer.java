@@ -15,7 +15,7 @@ public class WordAnalyzer {
                 wordFrequency.put(word, wordFrequency.getOrDefault(word, 0) + 1);// puts the word in the hashmap and increments the frequency for each word
             }
         }
-        this.totalWords = words.length;
+        this.totalWords = words.length; // sets the total words to the length of the words array
     }
 
     public Map<String, Integer> getWordFrequency() {// method to get word frequency returns a hashmap of word frequency
