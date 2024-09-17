@@ -81,8 +81,8 @@ public class WordAnalyzer {
             switch (choice) {
                 case 1:
                     try {
-                        Map<String, Integer> frequency = analyzer.getWordFrequency();
-                        for (Map.Entry<String, Integer> entry : frequency.entrySet()) {
+                        Map<String, Integer> frequency = analyzer.getWordFrequency(); // get word frequency from the analyzer object and store it in a hashmap 
+                        for (Map.Entry<String, Integer> entry : frequency.entrySet()) {// iterate through the hashmap and print the word frequency
                             System.out.println(entry.getKey() + " : " + entry.getValue());
                         }
                         break;
@@ -97,7 +97,7 @@ public class WordAnalyzer {
                     System.out.println("ENTER THE NUMBER OF LEAST FREQUENT WORDS TO DISPLAY : ");
                     int n = scanner.nextInt();
                     scanner.nextLine();
-                    List<String> leastFrequent = analyzer.getLeastFrequentWords(n);
+                    List<String> leastFrequent = analyzer.getLeastFrequentWords(n); // get least frequent words from the analyzer object and store it in a list
                     System.out.println("LEAST FREQUENT WORDS : " + String.join(", ", leastFrequent));
                     break;
                 case 4:
