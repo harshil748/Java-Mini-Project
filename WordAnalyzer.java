@@ -75,8 +75,8 @@ public class WordAnalyzer {
             System.out.println("4. REPLACE WORD.");
             System.out.println("5. REMOVE WORD.");
             System.out.println("6. PRINT CURRENT TEXT.");
-            System.out.println("7. EXIT.");
-            System.out.println("8. ANALYZE NEW SENTENCE.");
+            System.out.println("7. ANALYZE NEW SENTENCE.");
+            System.out.println("8. EXIT.");
             System.out.print("\nENTER YOUR CHOICE : ");
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -121,15 +121,15 @@ public class WordAnalyzer {
                     System.out.println("CURRENT TEXT : " + analyzer.getCurrentText());
                     break;
                 case 7:
-                    System.out.println("EXITING...");
-                    scanner.close();
-                    System.exit(0);
-                case 8:
                     System.out.println("ENTER NEW TEXT TO ANALYZE : ");
                     String newText = scanner.nextLine();
                     analyzer.analyzeText(newText); // clears the previous text and analyzes the new one
                     System.out.println("ANALYSIS COMPLETE FOR NEW TEXT.");
                     break;
+                case 8:
+                    System.out.println("EXITING...");
+                    scanner.close();
+                    System.exit(0);
                 default:
                     System.out.println("INVALID CHOICE. PLEASE TRY AGAIN.");
             }
