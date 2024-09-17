@@ -5,9 +5,10 @@ public class WordAnalyzer {
     private String originalText; // instance variable to store original text
     private Map<String, Integer> wordFrequency; // instance variable to store word frequency
     private int totalWords; // instance variable to store total words
+
     public void analyzeText(String text) { // method to analyze the text
-        this.originalText = text; // takes string input text 
-        String[] words = text.toLowerCase().replaceAll("[^a-z0-9\\s]", "").split("\\s+"); // converts text to lowercase, removes special characters and splits the text into words
+        this.originalText = text; // takes string input text
+        String[] words = text.toLowerCase().replaceAll("[^a-z0-9\\s]", "").split("\\s+"); // converts text to lowercase,removes special characters and splits the text into words
         this.wordFrequency = new HashMap<>();// creates a new hashmap to store word frequency
         for (String word : words) {// iterates through the words
             if (!word.isEmpty()) {
@@ -75,13 +76,14 @@ public class WordAnalyzer {
             System.out.println("5. REMOVE WORD.");
             System.out.println("6. PRINT CURRENT TEXT.");
             System.out.println("7. EXIT.");
+            System.out.println("8. ANALYZE NEW SENTENCE.");
             System.out.print("\nENTER YOUR CHOICE : ");
             int choice = scanner.nextInt();
             scanner.nextLine();
             switch (choice) {
                 case 1:
                     try {
-                        Map<String, Integer> frequency = analyzer.getWordFrequency(); // get word frequency from the analyzer object and store it in a hashmap 
+                        Map<String, Integer> frequency = analyzer.getWordFrequency(); // get word frequency from the analyzer object and store it in a hashmap
                         for (Map.Entry<String, Integer> entry : frequency.entrySet()) {// iterate through the hashmap and print the word frequency
                             System.out.println(entry.getKey() + " : " + entry.getValue());
                         }
@@ -114,7 +116,6 @@ public class WordAnalyzer {
                     String removedText = analyzer.removeWord(wordToRemove);
                     System.out.println("UPDATED TEXT : " + removedText);
                     System.out.println("TOTAL WORDS : " + analyzer.getTotalWords());
-
                     break;
                 case 6:
                     System.out.println("CURRENT TEXT : " + analyzer.getCurrentText());
@@ -123,6 +124,12 @@ public class WordAnalyzer {
                     System.out.println("EXITING...");
                     scanner.close();
                     System.exit(0);
+                case 8:
+                    System.out.println("ENTER NEW TEXT TO ANALYZE : ");
+                    String newText = scanner.nextLine();
+                    analyzer.analyzeText(newText); // clears the previous text and analyzes the new one
+                    System.out.println("ANALYSIS COMPLETE FOR NEW TEXT.");
+                    break;
                 default:
                     System.out.println("INVALID CHOICE. PLEASE TRY AGAIN.");
             }
