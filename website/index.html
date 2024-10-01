@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Analyzer</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Word Analyzer</h1>
+        <form id="textForm">
+            <textarea id="textInput" placeholder="Enter text here..."></textarea>
+            <button type="button" id="analyzeButton">Analyze Text</button>
+            <button type="button" id="replaceButton">Replace Word</button>
+            <button type="button" id="removeButton">Remove Word</button>
+        </form>
+        <div id="results">
+            <h2>Results</h2>
+            <div id="wordFrequency">
+                <h3>Word Frequency</h3>
+                <ul id="wordFrequencyList"></ul>
+            </div>
+            <div id="mostFrequentWord">
+                <h3>Most Frequent Word</h3>
+                <p id="mostFrequentWordText"></p>
+            </div>
+            <div id="leastFrequentWords">
+                <h3>Least Frequent Words</h3>
+                <ul id="leastFrequentWordsList"></ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

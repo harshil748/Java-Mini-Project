@@ -1,5 +1,12 @@
+import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpExchange;
+import java.nio.file.Files;
+import com.google.gson.Gson;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.io.*;
+import java.net.*;
 
 public class WordAnalyzer {
     private String originalText; // instance variable to store original text
@@ -57,82 +64,108 @@ public class WordAnalyzer {
         return totalWords;
     }
 
+    private void startServer() throws IOException {
+        HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+        server.createContext("/", new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                String path = exchange.getRequestURI().getPath();
+                if (path.equals("/")) {
+                    path = "/index.html";
+                }
+                File file = new File("website" + path);
+                if (file.exists()) {
+                    byte[] bytes = Files.readAllBytes(file.toPath());
+                    exchange.sendResponseHeaders(200, bytes.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(bytes);
+                    os.close();
+                } else {
+                    exchange.sendResponseHeaders(404, -1);
+                }
+            }
+        });
+        server.createContext("/analyze", new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                if (exchange.getRequestMethod().equalsIgnoreCase("POST")) {
+                    InputStream is = exchange.getRequestBody();
+                    String text = new BufferedReader(new InputStreamReader(is)).lines().collect(Collectors.joining("\n"));
+                    analyzeText(text);
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("wordFrequency", getWordFrequency());
+                    response.put("mostFrequentWord", getMostFrequentWord());
+                    response.put("leastFrequentWords", getLeastFrequentWords(5));
+                    String jsonResponse = new Gson().toJson(response);
+                    exchange.sendResponseHeaders(200, jsonResponse.length());
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(jsonResponse.getBytes());
+                    os.close();
+                } else {
+                    exchange.sendResponseHeaders(405, -1);
+                }
+            }
+        });
+        server.createContext("/replace", new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                if (exchange.getRequestMethod().equalsIgnoreCase("POST")) {
+                    InputStream is = exchange.getRequestBody();
+                    String requestBody = new BufferedReader(new InputStreamReader(is)).lines().collect(Collectors.joining("\n"));
+                    Map<String, String> request = new Gson().fromJson(requestBody, Map.class);
+                    String oldWord = request.get("oldWord");
+                    String newWord = request.get("newWord");
+                    String newText = replaceWord(oldWord, newWord);
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("newText", newText);
+                    response.put("wordFrequency", getWordFrequency());
+                    response.put("mostFrequentWord", getMostFrequentWord());
+                    response.put("leastFrequentWords", getLeastFrequentWords(5));
+                    String jsonResponse = new Gson().toJson(response);
+                    exchange.sendResponseHeaders(200, jsonResponse.length());
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(jsonResponse.getBytes());
+                    os.close();
+                } else {
+                    exchange.sendResponseHeaders(405, -1);
+                }
+            }
+        });
+        server.createContext("/remove", new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                if (exchange.getRequestMethod().equalsIgnoreCase("POST")) {
+                    InputStream is = exchange.getRequestBody();
+                    String requestBody = new BufferedReader(new InputStreamReader(is)).lines().collect(Collectors.joining("\n"));
+                    Map<String, String> request = new Gson().fromJson(requestBody, Map.class);
+                    String word = request.get("word");
+                    String newText = removeWord(word);
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("newText", newText);
+                    response.put("wordFrequency", getWordFrequency());
+                    response.put("mostFrequentWord", getMostFrequentWord());
+                    response.put("leastFrequentWords", getLeastFrequentWords(5));
+                    String jsonResponse = new Gson().toJson(response);
+                    exchange.sendResponseHeaders(200, jsonResponse.length());
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(jsonResponse.getBytes());
+                    os.close();
+                } else {
+                    exchange.sendResponseHeaders(405, -1);
+                }
+            }
+        });
+        server.setExecutor(null);
+        server.start();
+    }
+
     public static void main(String[] args) {
         WordAnalyzer analyzer = new WordAnalyzer();
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("ENTER TEXT TO ANALYZE : \n");
-        String text = scanner.nextLine();
-        analyzer.analyzeText(text);
-        String[] words = text.split(" ");
-        int wordCount = words.length;
-        System.out.println("TOTAL WORDS : " + wordCount);
-        System.out.println("ANALYSIS COMPLETE.");
-        while (true) {
-            System.out.println("\nWORD ANALYZER MENU:\n");
-            System.out.println("1. GET WORD FREQUENCY.");
-            System.out.println("2. GET MOST FREQUENT WORD.");
-            System.out.println("3. GET LEAST FREQUENT WORDS.");
-            System.out.println("4. REPLACE WORD.");
-            System.out.println("5. REMOVE WORD.");
-            System.out.println("6. PRINT CURRENT TEXT.");
-            System.out.println("7. ANALYZE NEW SENTENCE.");
-            System.out.println("8. EXIT.");
-            System.out.print("\nENTER YOUR CHOICE : ");
-            int choice = scanner.nextInt();
-            scanner.nextLine();
-            switch (choice) {
-                case 1:
-                    try {
-                        Map<String, Integer> frequency = analyzer.getWordFrequency(); // get word frequency from the analyzer object and store it in a hashmap
-                        for (Map.Entry<String, Integer> entry : frequency.entrySet()) {// iterate through the hashmap and print the word frequency
-                            System.out.println(entry.getKey() + " : " + entry.getValue());
-                        }
-                        break;
-                    } catch (Exception e) {
-                        System.out.println("ENTER AN INPUT FIRST.");
-                    }
-                case 2:
-                    String mostFrequent = analyzer.getMostFrequentWord();
-                    System.out.println("MOST FREQUENT WORD: " + mostFrequent);
-                    break;
-                case 3:
-                    System.out.println("ENTER THE NUMBER OF LEAST FREQUENT WORDS TO DISPLAY : ");
-                    int n = scanner.nextInt();
-                    scanner.nextLine();
-                    List<String> leastFrequent = analyzer.getLeastFrequentWords(n); // get least frequent words from the analyzer object and store it in a list
-                    System.out.println("LEAST FREQUENT WORDS : " + String.join(", ", leastFrequent));
-                    break;
-                case 4:
-                    System.out.println("ENTER THE WORD TO REPLACE : ");
-                    String oldWord = scanner.nextLine();
-                    System.out.println("ENTER THE NEW WORD : ");
-                    String newWord = scanner.nextLine();
-                    String replacedText = analyzer.replaceWord(oldWord, newWord);
-                    System.out.println("UPDATED TEXT : " + replacedText);
-                    break;
-                case 5:
-                    System.out.println("ENTER THE WORD TO REMOVE : ");
-                    String wordToRemove = scanner.nextLine();
-                    String removedText = analyzer.removeWord(wordToRemove);
-                    System.out.println("UPDATED TEXT : " + removedText);
-                    System.out.println("TOTAL WORDS : " + analyzer.getTotalWords());
-                    break;
-                case 6:
-                    System.out.println("CURRENT TEXT : " + analyzer.getCurrentText());
-                    break;
-                case 7:
-                    System.out.println("ENTER NEW TEXT TO ANALYZE : ");
-                    String newText = scanner.nextLine();
-                    analyzer.analyzeText(newText); // clears the previous text and analyzes the new one
-                    System.out.println("ANALYSIS COMPLETE FOR NEW TEXT.");
-                    break;
-                case 8:
-                    System.out.println("EXITING...");
-                    scanner.close();
-                    System.exit(0);
-                default:
-                    System.out.println("INVALID CHOICE. PLEASE TRY AGAIN.");
-            }
+        try {
+            analyzer.startServer();
+            System.out.println("Server started on port 8080");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
